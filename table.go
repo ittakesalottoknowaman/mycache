@@ -23,18 +23,13 @@ func (t *cacheTable) Set(key interface{}, value interface{}) {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
-	var item *cacheItem
-	var exist bool
-
-	item, exist = t.items[key]
-	if exist {
+	if item, exist := t.items[key]; exist {
 		item.value = value
-	} else {
-		item = newCacheItem(value)
-		t.items[key] = item
+		item.changeTime = time.Now()
+		return
 	}
-
-	item.changeTime = time.Now()
+	item := newCacheItem(value)
+	t.items[key] = item
 }
 
 // SetWithExpire ...
@@ -42,13 +37,10 @@ func (t *cacheTable) SetWithExpire(key interface{}, value interface{}, lifeSpan 
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
-	var item *cacheItem
-	var exist bool
-
-	if exist {
+	if item, exist := t.items[key]; exist {
 		item.value = value
 	} else {
-		item = newCacheItem(value)
+		t.Set(key, value)
 	}
 
 	t.Expire(key, lifeSpan)
@@ -57,7 +49,6 @@ func (t *cacheTable) SetWithExpire(key interface{}, value interface{}, lifeSpan 
 // Get ...
 func (t *cacheTable) Get(key interface{}) interface{} {
 	t.mutex.RLock()
-	defer t.mutex.RUnlock()
 
 	item, exist := t.items[key]
 	if !exist {
@@ -66,10 +57,14 @@ func (t *cacheTable) Get(key interface{}) interface{} {
 
 	// 判断是否超过过期时间
 	if item.isExpire() {
+		t.mutex.RUnlock()
 		t.Delete(key)
 		return nil
 	}
-	return item.value
+
+	value := item.value
+	t.mutex.RUnlock()
+	return value
 }
 
 // Delete ...

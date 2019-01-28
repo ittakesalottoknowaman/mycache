@@ -1,6 +1,9 @@
 package mycache
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 // CacheItem ...
 type cacheItem struct {
@@ -26,6 +29,7 @@ func (i *cacheItem) ttl() int64 {
 	if i.lifeSpan == 0 {
 		return 0
 	}
+	fmt.Println(i.lifeSpan, time.Now().Sub(i.changeTime), time.Now().Sub(i.changeTime) > i.lifeSpan)
 
 	return (i.lifeSpan.Nanoseconds() - time.Now().Sub(i.changeTime).Nanoseconds()) / 1000000
 }
