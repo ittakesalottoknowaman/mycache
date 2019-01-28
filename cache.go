@@ -27,16 +27,10 @@ func (c *cacheDB) getTable(tableName string) *table.CacheTable {
 
 func (c *cacheDB) addTable(tableName string) *table.CacheTable {
 	c.mutex.Lock()
-	defer c.mutex.RUnlock()
+	defer c.mutex.Unlock()
 	t := table.NewCacheTable(tableName)
 	c.table[tableName] = t
 	return t
-}
-
-func (c *cacheDB) deleteTable(tableName string) {
-	c.mutex.Lock()
-	defer c.mutex.RUnlock()
-	delete(cache.table, tableName)
 }
 
 func New(tableName string) *table.CacheTable {

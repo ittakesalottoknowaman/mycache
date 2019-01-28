@@ -31,9 +31,12 @@ func (t *CacheTable) Set(key interface{}, value interface{}) {
 }
 
 // SetWithExpire ...
-func (t *CacheTable) SetWithExpire(key interface{}, value interface{}, expire time.Duration) {
+func (t *CacheTable) SetWithExpire(key interface{}, value interface{}, lifeSpan time.Duration) {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
+
+	t.items[key] = item.NewCacheItem(value)
+	t.Expire(key, lifeSpan)
 }
 
 // Get ...
@@ -61,7 +64,18 @@ func (t *CacheTable) Delete(key interface{}) bool {
 }
 
 // Expire ...
-func (t *CacheTable) Expire(key interface{}, expire time.Duration) {
+func (t *CacheTable) Expire(key interface{}, lifeSpan time.Duration) {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
+
+	item, exist := t.items[key]
+	if !exist {
+		return
+	}
+
+	item.LifeSpan = lifeSpan
+	if item.Timer != nil {
+		item.Timer.Stop()
+	}
+	item.Timer = time.AfterFunc(lifeSpan, func() { t.Delete(key) })
 }
