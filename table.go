@@ -19,6 +19,7 @@ func newCacheTable(tableName string) *cacheTable {
 	}
 }
 
+// Set ...
 func (t *cacheTable) Set(key interface{}, value interface{}) {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
@@ -109,4 +110,13 @@ func (t *cacheTable) TTL(key interface{}) int64 {
 
 	ttl := item.ttl()
 	return ttl
+}
+
+// Exist ...
+func (t *cacheTable) Exist(key interface{}) bool {
+	t.mutex.RLock()
+	defer t.mutex.RUnlock()
+
+	_, exist := t.items[key]
+	return exist
 }

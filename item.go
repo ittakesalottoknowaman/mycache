@@ -4,7 +4,6 @@ import (
 	"time"
 )
 
-// CacheItem ...
 type cacheItem struct {
 	key         interface{}
 	value       interface{}
@@ -15,7 +14,6 @@ type cacheItem struct {
 	accessCount uint64
 }
 
-// NewCacheItem ...
 func newCacheItem(value interface{}) *cacheItem {
 	return &cacheItem{
 		value:      value,
