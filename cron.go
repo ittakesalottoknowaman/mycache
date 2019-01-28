@@ -14,5 +14,6 @@ func cronExpirationCheck() {
 				table.mutex.RLock()
 			}
 		}
+		table.mutex.RUnlock()
 	}
 }
