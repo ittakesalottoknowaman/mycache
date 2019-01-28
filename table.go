@@ -25,6 +25,7 @@ func (t *cacheTable) Set(key interface{}, value interface{}) {
 
 	var item *cacheItem
 	var exist bool
+
 	item, exist = t.items[key]
 	if exist {
 		item.value = value
@@ -41,7 +42,15 @@ func (t *cacheTable) SetWithExpire(key interface{}, value interface{}, lifeSpan 
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
-	t.items[key] = newCacheItem(value)
+	var item *cacheItem
+	var exist bool
+
+	if exist {
+		item.value = value
+	} else {
+		item = newCacheItem(value)
+	}
+
 	t.Expire(key, lifeSpan)
 }
 
