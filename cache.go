@@ -2,21 +2,19 @@ package mycache
 
 import (
 	"sync"
-
-	"mycache/table"
 )
 
 type cacheDB struct {
 	mutex *sync.RWMutex
-	table map[string]*table.CacheTable
+	table map[string]*cacheTable
 }
 
 var cache = &cacheDB{
 	mutex: new(sync.RWMutex),
-	table: make(map[string]*table.CacheTable),
+	table: make(map[string]*cacheTable),
 }
 
-func (c *cacheDB) getTable(tableName string) *table.CacheTable {
+func (c *cacheDB) getTable(tableName string) *cacheTable {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 	if t, exist := c.table[tableName]; exist {
@@ -25,15 +23,16 @@ func (c *cacheDB) getTable(tableName string) *table.CacheTable {
 	return nil
 }
 
-func (c *cacheDB) addTable(tableName string) *table.CacheTable {
+func (c *cacheDB) addTable(tableName string) *cacheTable {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
-	t := table.NewCacheTable(tableName)
+	t := newCacheTable(tableName)
 	c.table[tableName] = t
 	return t
 }
 
-func New(tableName string) *table.CacheTable {
+// New ...
+func New(tableName string) *cacheTable {
 	if cacheTable := cache.getTable(tableName); cacheTable != nil {
 		return cacheTable
 	}
