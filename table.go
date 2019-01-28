@@ -59,11 +59,17 @@ func (t *cacheTable) Get(key interface{}) interface{} {
 	t.mutex.RLock()
 	defer t.mutex.RUnlock()
 
-	if item, exist := t.items[key]; exist {
-		return item.value
+	item, exist := t.items[key]
+	if !exist {
+		return nil
 	}
 
-	return nil
+	// 判断是否超过过期时间
+	if item.isExpire() {
+		t.Delete(key)
+		return nil
+	}
+	return item.value
 }
 
 // Delete ...
@@ -93,7 +99,7 @@ func (t *cacheTable) Expire(key interface{}, lifeSpan time.Duration) {
 	if item.timer != nil {
 		item.timer.Reset(lifeSpan)
 	}
-	item.timer = time.AfterFunc(lifeSpan, func() { t.Delete(key) })
+	// item.timer = time.AfterFunc(lifeSpan, func() { t.Delete(key) })
 }
 
 // TTL ...
@@ -106,9 +112,5 @@ func (t *cacheTable) TTL(key interface{}) int64 {
 		return 0
 	}
 
-	if item.lifeSpan == 0 {
-		return 0
-	}
-
-	return (item.lifeSpan.Nanoseconds() - time.Now().Sub(item.changeTime).Nanoseconds()) / 1000000
+	return item.ttl()
 }

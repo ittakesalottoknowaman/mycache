@@ -21,3 +21,23 @@ func newCacheItem(value interface{}) *cacheItem {
 		changeTime: time.Now(),
 	}
 }
+
+func (i *cacheItem) ttl() int64 {
+	if i.lifeSpan == 0 {
+		return 0
+	}
+
+	return (i.lifeSpan.Nanoseconds() - time.Now().Sub(i.changeTime).Nanoseconds()) / 1000000
+}
+
+func (i *cacheItem) isExpire() bool {
+	if i.lifeSpan == 0 {
+		return false
+	}
+
+	if time.Now().Sub(i.changeTime) > i.lifeSpan {
+		return true
+	}
+
+	return false
+}
