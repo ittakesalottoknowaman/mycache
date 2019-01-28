@@ -107,5 +107,6 @@ func (t *cacheTable) TTL(key interface{}) int64 {
 		return 0
 	}
 
-	return item.ttl()
+	ttl := item.ttl()
+	return ttl
 }
