@@ -5,13 +5,11 @@ import (
 )
 
 type cacheItem struct {
-	key         interface{}
-	value       interface{}
-	lifeSpan    time.Duration
-	timer       *time.Timer
-	createTime  time.Time
-	changeTime  time.Time
-	accessCount uint64
+	key        interface{}
+	value      interface{}
+	lifeSpan   time.Duration
+	createTime time.Time
+	changeTime time.Time
 }
 
 func newCacheItem(value interface{}) *cacheItem {

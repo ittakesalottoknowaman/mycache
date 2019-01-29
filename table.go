@@ -29,8 +29,7 @@ func (t *cacheTable) Set(key interface{}, value interface{}) {
 		item.changeTime = time.Now()
 		return
 	}
-	item := newCacheItem(value)
-	t.items[key] = item
+	t.items[key] = newCacheItem(value)
 }
 
 // SetWithExpire ...
@@ -92,9 +91,6 @@ func (t *cacheTable) Expire(key interface{}, lifeSpan time.Duration) {
 
 	item.changeTime = time.Now()
 	item.lifeSpan = lifeSpan
-	if item.timer != nil {
-		item.timer.Reset(lifeSpan)
-	}
 }
 
 // TTL ...
@@ -114,7 +110,6 @@ func (t *cacheTable) TTL(key interface{}) int64 {
 // Exist ...
 func (t *cacheTable) Exist(key interface{}) bool {
 	t.mutex.RLock()
-	// defer t.mutex.RUnlock()
 
 	item, exist := t.items[key]
 	t.mutex.RUnlock()
